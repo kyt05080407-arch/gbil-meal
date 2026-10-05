@@ -1,0 +1,41 @@
+name: Make lunch image
+
+on:
+  schedule:
+    # 평일(월~금) 06:15 KST = 일~목 21:15 UTC
+    - cron: "15 21 * * 0-4"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "YYYYMMDD (비우면 오늘, KST)"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: meal
+  cancel-in-progress: false
+
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install font and Pillow
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk
+          pip install -q pillow
+      - name: Make image
+        env:
+          MEAL_DATE: ${{ github.event.inputs.date }}
+        run: python scripts/make_meal.py
+      - name: Commit
+        run: |
+          git config user.name "Claude"
+          git config user.email "noreply@anthropic.com"
+          git add images
+          git diff --cached --quiet && exit 0
+          git commit -m "Lunch image $(TZ=Asia/Seoul date +%F)"
+          for i in 1 2 3; do git pull --rebase -q && git push && break; sleep 5; done
