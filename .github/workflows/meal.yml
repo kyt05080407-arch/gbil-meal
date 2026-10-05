@@ -32,10 +32,12 @@ jobs:
           MEAL_DATE: ${{ github.event.inputs.date }}
         run: python scripts/make_meal.py
       - name: Commit
+        env:
+          MEAL_DATE: ${{ github.event.inputs.date }}
         run: |
           git config user.name "Claude"
           git config user.email "noreply@anthropic.com"
           git add images
           git diff --cached --quiet && exit 0
-          git commit -m "Lunch image $(TZ=Asia/Seoul date +%F)"
+          git commit -m "Lunch image ${MEAL_DATE:-$(TZ=Asia/Seoul date +%Y%m%d)}"
           for i in 1 2 3; do git pull --rebase -q && git push && break; sleep 5; done
