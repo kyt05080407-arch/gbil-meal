@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       date:
-        description: "YYYYMMDD (비우면 오늘, KST)"
+        description: "YYYYMMDD 또는 YYYYMMDD-YYYYMMDD 범위 (비우면 오늘, KST)"
         required: false
 
 permissions:

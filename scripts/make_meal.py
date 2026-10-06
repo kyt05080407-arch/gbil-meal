@@ -61,8 +61,27 @@ def render(lines, path):
     img.save(path)
 
 
+def dates():
+    v = (os.environ.get("MEAL_DATE") or "").strip()
+    if "-" in v:
+        a, b = v.split("-")
+        d = dt.datetime.strptime(a, "%Y%m%d").date()
+        e = dt.datetime.strptime(b, "%Y%m%d").date()
+        out = []
+        while d <= e:
+            if d.weekday() < 5:
+                out.append(d.strftime("%Y%m%d"))
+            d += dt.timedelta(days=1)
+        return out
+    return [v or dt.datetime.now(KST).strftime("%Y%m%d")]
+
+
 def main():
-    ymd = os.environ.get("MEAL_DATE") or dt.datetime.now(KST).strftime("%Y%m%d")
+    for ymd in dates():
+        one(ymd)
+
+
+def one(ymd):
     iso = f"{ymd[:4]}-{ymd[4:6]}-{ymd[6:]}"
     os.makedirs("images", exist_ok=True)
     ddish = fetch_lunch(ymd)
